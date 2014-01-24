@@ -21,6 +21,7 @@ NSString * const MMshowsSelectionIndicator = @"showsSelectionIndicator";
 
 @interface MMPickerView () <UIPickerViewDelegate, UIPickerViewDataSource>
 
+@property (strong, nonatomic) id<MMPickerViewDelegate> pickerViewDelegate;
 @property (nonatomic, strong) UILabel *pickerViewLabel;
 @property (nonatomic, strong) UIView *pickerViewLabelView;
 @property (nonatomic, strong) UIView *pickerContainerView;
@@ -72,6 +73,23 @@ NSString * const MMshowsSelectionIndicator = @"showsSelectionIndicator";
 }
 
 +(void)showPickerViewInView:(UIView *)view
+               withDelegate:(id<MMPickerViewDelegate>)delegate
+                withStrings:(NSArray *)strings
+                withOptions:(NSDictionary *)options
+                 completion:(void (^)(NSString *))completion{
+    
+    [[self sharedView] initializePickerViewInView:view
+                                        withArray:strings
+                                      withOptions:options];
+    
+    [[self sharedView] setPickerViewDelegate:delegate];
+    [[self sharedView] setPickerHidden:NO callBack:nil];
+    [self sharedView].onDismissCompletion = completion;
+    [view addSubview:[self sharedView]];
+    
+}
+
++(void)showPickerViewInView:(UIView *)view
                 withObjects:(NSArray *)objects
                 withOptions:(NSDictionary *)options
     objectToStringConverter:(NSString *(^)(id))converter
@@ -89,8 +107,18 @@ NSString * const MMshowsSelectionIndicator = @"showsSelectionIndicator";
 
 #pragma mark - Dismiss Methods
 
-+(void)dismissWithCompletion:(void (^)(NSString *))completion{
-  [[self sharedView] setPickerHidden:YES callBack:completion];
++(void)dismissWithCompletion:(void (^)(NSString *))completion
+{
+    [[self sharedView] setPickerHidden:YES callBack:completion];
+    [self performSelector:@selector(callPickerViewDismissDelegate:) withObject:nil afterDelay:0.3];
+}
+
++ (IBAction)callPickerViewDismissDelegate:(id)sender
+{
+    if ([self sharedView].pickerViewDelegate)
+    {
+        [[self sharedView].pickerViewDelegate didDismissPickerView];
+    }
 }
 
 -(void)dismiss{

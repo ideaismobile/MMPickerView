@@ -19,12 +19,24 @@ extern NSString * const MMtoolbarBackgroundImage;
 extern NSString * const MMtextAlignment;
 extern NSString * const MMshowsSelectionIndicator;
 
+@protocol MMPickerViewDelegate <NSObject>
+
+- (void)didDismissPickerView;
+
+@end
+
 @interface MMPickerView: UIView 
 
 +(void)showPickerViewInView: (UIView *)view
                 withStrings: (NSArray *)strings
                 withOptions: (NSDictionary *)options
                  completion: (void(^)(NSString *selectedString))completion;
+
++(void)showPickerViewInView:(UIView *)view
+               withDelegate:(id<MMPickerViewDelegate>)delegate
+                withStrings:(NSArray *)strings
+                withOptions:(NSDictionary *)options
+                 completion:(void (^)(NSString *))completion;
 
 +(void)showPickerViewInView: (UIView *)view
                 withObjects: (NSArray *)objects
